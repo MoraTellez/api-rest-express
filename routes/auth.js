@@ -1,9 +1,9 @@
-import express from 'express'
+import { Router } from 'express'
 import { login, register} from '../controllers/AuthController.js'
 import { body } from 'express-validator'
 import { ValidationResultExpress } from '../middlewares/ValidationResult.js'
 
-const router = express.Router()
+const router = Router()
 
 router.post('/login',  [
   body('email', 'Email inválido').trim().isEmail().normalizeEmail(),

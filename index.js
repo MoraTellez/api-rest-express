@@ -6,7 +6,7 @@ import routerAuth from './routes/auth.js';
 
 const app = express();
 app.use(express.json())
-app.use('/api', routerAuth)
+app.use('/api/auth', routerAuth)
 
 const PORT = process.env.PORT || 5000
 app.listen(5000, () => {
