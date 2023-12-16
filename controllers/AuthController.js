@@ -1,5 +1,6 @@
 import { User } from "../models/user.js"
-import jwt from "jsonwebtoken"
+import { generateRefeshToken, generateToken } from "../utils/tokenManager.js"
+import jwt from 'jsonwebtoken'
 
 const register = async (req, res) => {
   const { email, password } = req.body
@@ -11,7 +12,6 @@ const register = async (req, res) => {
     await user.save()
 
     // Json Web Token
-    
 
     return res.status(201).json({msg: "Usuario registrado con éxito"})
   } catch (error) {
@@ -29,16 +29,48 @@ const login = async (req, res) => {
     if(!isValidPassword) throw new Error('Los datos son incorrectos')
 
     // Json Web Token
-    const token = jwt.sign({uid: user._id}, process.env.JWT_SECRET)
+    const { token, expiresIn} = generateToken(user._id)
+    generateRefeshToken(user.id, res)
 
-    res.json({token})
+    res.json({token, expiresIn})
   } catch (error) {
     return res.status(404).json({error: error.message})
   }
 
 }
 
+const infoUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.uid).lean().select(['-password'])
+    if(!user) throw new Error('Error en las credenciales')
+    return res.status(200).json({user})
+  } catch (error) {
+    return res.status(500).json({error: 'Ha ocurrido un error en el servidor' })
+  }
+}
+
+const refreshToken = (req, res) => {
+  try {
+    const refreshTokenCookie = req.cookies.refreshToken
+    if(!refreshTokenCookie) throw new Error('Credenciales inválidas')
+    const { uid } = jwt.verify(token, process.env.JWT_REFRESH)
+    const {token, expiresIn} = generateToken(uid)
+
+    return res.json({token, expiresIn})
+  } catch (error) {
+    return res.status(401).send(error.message)
+  }
+}
+
+const logout = (req, res) => {
+  res.clearCookie('refreshToken')
+  res.json({msg: 'proceso finalizado'})
+}
+
 export {
   login,
-  register
+  register,
+  infoUser,
+  refreshToken,
+  logout
 }
