@@ -1,30 +1,21 @@
 import { Router } from 'express'
 import { login, register, infoUser, refreshToken, logout} from '../controllers/AuthController.js'
-import { body } from 'express-validator'
-import { ValidationResultExpress } from '../middlewares/ValidationResult.js'
 import { requireToken } from '../middlewares/RequireToken.js'
+import { requireRefreshToken } from '../middlewares/RequireRefreshToken.js'
+import { bodyLoginValidator, bodyRegisterValidator } from '../middlewares/ValidatorManager.js'
 
 const router = Router()
 
-router.post('/register', [
-  body('email', 'Email inválido').trim().isEmail().normalizeEmail(),
-  body('password', 'Password inválido').isLength({min: 6}),
-  body('repassword', 'Contraseñas no coinciden').custom((value, {req}) => {
-    return value === req.body.password
-  })
-], 
-ValidationResultExpress,
+router.post('/register', 
+bodyRegisterValidator,
 register)
 
-router.post('/login',  [
-  body('email', 'Email inválido').trim().isEmail().normalizeEmail(),
-  body('password', 'Password inválido').isLength({min: 6})
-],
-ValidationResultExpress,
+router.post('/login',  
+bodyLoginValidator,
 login)
 
 router.get('/protected', requireToken, infoUser)
-router.get('/refresh', refreshToken)
+router.get('/refresh', requireRefreshToken, refreshToken)
 router.get('/logout', logout)
 
 export default router

@@ -9,6 +9,6 @@ export const requireToken = (req, res, next) => {
     req.uid = uid 
     next()
   } catch (error) {
-    return res.status(401).json({error: error.message})
+    return res.status(401).json({error: error.message}) 
   }
 }
