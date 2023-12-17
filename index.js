@@ -8,17 +8,17 @@ import routerLink from './routes/link.js';
 import routerRedirect from './routes/redirect.js'
 
 const app = express();
-// const whiteList = [process.env.ORIGIN1]
+const whiteList = [process.env.ORIGIN1]
 
-// app.use(cors({
-//   origin: function(origin, callback) {
-//     if(whiteList.includes(origin)){
-//       return callback(null, origin)
-//     }
+app.use(cors({
+  origin: function(origin, callback) {
+    if(!origin || whiteList.includes(origin)){
+      return callback(null, origin)
+    }
 
-//     return callback(`Error CROS: ${origin} no autorizado`)
-//   }
-// }))
+    return callback(`Error CROS: ${origin} no autorizado`)
+  }
+}))
 app.use(express.json())
 app.use(cookieParser())
 app.use('/api/auth', routerAuth)
